@@ -1,6 +1,6 @@
 coisas da placa
 
-ok	Saídas digitais
+ok	Saídas digitais - erro do botão 2 acionar saída 1
 ok	Entradas digitais
 ok	LCD
 ok	Teclado

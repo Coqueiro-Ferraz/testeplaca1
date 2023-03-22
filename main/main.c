@@ -233,7 +233,7 @@ void Ativa_tudo(uint8_t estado)
     int j;
     gpio_set_level(IO_SH_LD,1);
     vTaskDelay(10 / portTICK_RATE_MS);  
-    for (j = 7; j > 0; j--)
+    for (j = 7; j >= 0; j--)
     {
         entradas <<= 1;
         entradas += gpio_get_level(IO_DT_RD);
