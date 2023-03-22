@@ -1,0 +1,22 @@
+coisas da placa
+
+ok	Saídas digitais
+ok	Entradas digitais
+ok	LCD
+ok	Teclado
+ok	GitHub
+	Motor
+	ADC
+	DHT
+	Expander
+	UART via DHT
+	PWM via DHT
+	I2C via DHT
+	SPI via DHT e EXP
+	DAC? via DHT
+	Apresentação
+	Wi-fi
+	BT
+	Foto célula
+	Fan Speed
+	Emissor de senhas projeto final
