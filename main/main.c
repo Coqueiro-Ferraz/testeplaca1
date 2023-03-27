@@ -186,8 +186,7 @@ void lcd_write_string(const char *str)
 void lcd_init(void)
 {
     dado_atual = 0x00;
-    //Enviar_dado_lcd(dado_atual);
-
+    
     vTaskDelay(15 / portTICK_RATE_MS); 
 
     gpio_set_direction(LCD_DT_WR, GPIO_MODE_OUTPUT);
@@ -227,8 +226,6 @@ void lcd_clear(void)
 {
     lcd_write_byte(0x01, 0);
     vTaskDelay(2 / portTICK_RATE_MS);
-    //lcd_write_byte(0x02, 0);
-    //vTaskDelay(2 / portTICK_RATE_MS);    
 }
 
 void Ativa_tudo(uint8_t estado)
@@ -247,17 +244,12 @@ void Ativa_tudo(uint8_t estado)
         gpio_set_level(IO_CK,0);
         vTaskDelay(10 / portTICK_RATE_MS);
     } 
-    if(oldEntradas != entradas)
-    {
-       // oldEntradas = entradas;
-        flagMudou = 1;
-    }
     gpio_set_level(IO_SH_LD,0);
     vTaskDelay(10 / portTICK_RATE_MS); 
 
 }
 
-void setalinha(void)
+void setalinha_2(void)
 {
     if(linha <= 1)
     {
@@ -268,7 +260,7 @@ void setalinha(void)
         linha >>= 1;
     }
 }
-void le_teclado ()
+void le_teclado_2 ()
 {
     while(1)
     {        
@@ -298,19 +290,13 @@ void le_teclado ()
             gpio_set_level(TEC_CK, 0);
             
         }
-        if(oldMostra != mostra)
-        {
-           // oldMostra = mostra;
-            flagMudou = 1;
-        }
         gpio_set_level(TEC_SH_LD,0);
-        setalinha();
+        setalinha_2();
     }
 }
 
 void selTec()
 {
-    //flagMudou = 1;
     switch (mostra)
     {
         case 10: tecla = '1';
@@ -368,58 +354,26 @@ void rotina()
         int i;
         exibe[8] = 0;
 
-       // vTaskDelay(200 / portTICK_RATE_MS); 
         ESP_LOGE("capturado", "%i", mostra);
         for(i=0;i<8;i++)
         {
             exibe[i] = ((entradas >> i) & 1) + 48;
         }
         
-       // Ativa_tudo(0);
         vTaskDelay(200 / portTICK_RATE_MS); 
 
         selTec();
-      //  lcd_write_byte(0x80,0);
-
-
-
-
-
-      //  if(oldEntradas != entradas)  
-      //  { 
-      //      oldEntradas = entradas;
-         /*   ESP_LOGE("capturado", "%i", mostra);
-            for(i=0;i<8;i++)
-            {
-                exibe[i] = ((entradas >> i) & 1) + 48;
-            }
-            
-            vTaskDelay(200 / portTICK_RATE_MS); */
-         /*   flagMudou = 0;*/
-        //    lcd_clear();
-            vTaskDelay(10 / portTICK_RATE_MS); 
-            lcd_write_byte(0x80,0);
-            lcd_write_string(&exibe[0]);
-            lcd_write_byte(0xC0,0);
-            lcd_write_byte(tecla,1);
-      /*      
-        }    
-        if(oldMostra != mostra)
-        {
-            //selTec();
-            oldMostra = mostra;
-            lcd_clear();
-            vTaskDelay(10 / portTICK_RATE_MS); 
-        
-            lcd_write_string(&exibe[0]);
-            lcd_write_byte(0xC0,0);
-            lcd_write_byte(tecla,1);   */         
-        //} 
+        vTaskDelay(10 / portTICK_RATE_MS); 
+        lcd_write_byte(0x80,0);
+        lcd_write_string(&exibe[0]);
+        lcd_write_byte(0xC0,0);
+        lcd_write_byte(tecla,1);
+     
     }
 }
 void app_main(void)
 {
-    
+    int i;
     gpio_pad_select_gpio(LCD_DT_WR);
     gpio_pad_select_gpio(LCD_CK);
     gpio_pad_select_gpio(LCD_SH_LD);
@@ -460,16 +414,32 @@ void app_main(void)
     vTaskDelay(200 / portTICK_RATE_MS); 
     lcd_init();
     
-    vTaskDelay(200 / portTICK_RATE_MS); 
-    lcd_write_string("__>_HAGACEEF_<__");
-
+    for(i=0;i<7;i++)
+    {
+        vTaskDelay(100 / portTICK_RATE_MS); 
+        lcd_write_string(" >>>HAGACEEF<<< ");
+        vTaskDelay(50 / portTICK_RATE_MS); 
+        lcd_write_byte (0x80,0);
+        lcd_write_string("> >>HAGACEEF<< <");
+        vTaskDelay(50 / portTICK_RATE_MS); 
+        lcd_write_byte (0x80,0);
+        lcd_write_string(">> >HAGACEEF< <<");
+        vTaskDelay(50 / portTICK_RATE_MS); 
+        lcd_write_byte (0x80,0);
+        lcd_write_string(">>> HAGACEEF <<<");
+        vTaskDelay(50 / portTICK_RATE_MS); 
+        lcd_write_byte (0x80,0);
+        lcd_write_string(">>>>HAGACEEF<<<<");
+        vTaskDelay(50 / portTICK_RATE_MS); 
+        lcd_write_byte (0x80,0);
+    }
     
-    vTaskDelay(200 / portTICK_RATE_MS); 
+    vTaskDelay(500 / portTICK_RATE_MS); 
     lcd_clear();
 
     flagMudou = 1;
 
-    xTaskCreate(&le_teclado,"Leitura do teclado",2048,NULL,2,NULL);
+    xTaskCreate(&le_teclado_2,"Leitura do teclado",2048,NULL,2,NULL);
     xTaskCreate(&rotina,"Rotina",2048,NULL,3,NULL);
 
 }

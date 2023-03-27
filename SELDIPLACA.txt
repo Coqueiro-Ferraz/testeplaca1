@@ -1,6 +1,6 @@
-coisas da placa
+coisas do projeto de testes da placa
 
-ok	Saídas digitais - erro do botão 2 acionar saída 1
+ok	Saídas digitais
 ok	Entradas digitais
 ok	LCD
 ok	Teclado
@@ -14,6 +14,7 @@ ok	GitHub
 	I2C via DHT
 	SPI via DHT e EXP
 	DAC? via DHT
+	7 segmentos via Expander
 	Apresentação
 	Wi-fi
 	BT
