@@ -117,7 +117,7 @@ void app_main(void)
 uint8_t dado_atual;
 uint8_t linha = 1;
 uint8_t coluna;//, oldmostra;
-uint8_t mostra = 0;
+volatile uint8_t mostra = 0;
 uint8_t oldMostra = 0;
 char tecla = '_';
 bool flagMudou;
@@ -364,7 +364,7 @@ void rotina()
 {
     while (1)
     {
-        char exibe[9];
+        char exibe[9] = {'x','x','x','x','x','x','x','x'};
         int i;
         exibe[8] = 0;
 
@@ -379,23 +379,42 @@ void rotina()
         vTaskDelay(200 / portTICK_RATE_MS); 
 
         selTec();
-       // lcd_write_byte(0x80,0);
+      //  lcd_write_byte(0x80,0);
 
-        if(flagMudou == 1)
+
+
+
+
+      //  if(oldEntradas != entradas)  
+      //  { 
+      //      oldEntradas = entradas;
+         /*   ESP_LOGE("capturado", "%i", mostra);
+            for(i=0;i<8;i++)
+            {
+                exibe[i] = ((entradas >> i) & 1) + 48;
+            }
+            
+            vTaskDelay(200 / portTICK_RATE_MS); */
+         /*   flagMudou = 0;*/
+        //    lcd_clear();
+            vTaskDelay(10 / portTICK_RATE_MS); 
+            lcd_write_byte(0x80,0);
+            lcd_write_string(&exibe[0]);
+            lcd_write_byte(0xC0,0);
+            lcd_write_byte(tecla,1);
+      /*      
+        }    
+        if(oldMostra != mostra)
         {
-
+            //selTec();
             oldMostra = mostra;
-            oldEntradas = entradas;
-
-            flagMudou = 0;
             lcd_clear();
             vTaskDelay(10 / portTICK_RATE_MS); 
         
             lcd_write_string(&exibe[0]);
             lcd_write_byte(0xC0,0);
-            lcd_write_byte(tecla,1);
-            
-        }
+            lcd_write_byte(tecla,1);   */         
+        //} 
     }
 }
 void app_main(void)
@@ -442,7 +461,11 @@ void app_main(void)
     lcd_init();
     
     vTaskDelay(200 / portTICK_RATE_MS); 
-    lcd_write_string("___HAGACEEF___");
+    lcd_write_string("__>_HAGACEEF_<__");
+
+    
+    vTaskDelay(200 / portTICK_RATE_MS); 
+    lcd_clear();
 
     flagMudou = 1;
 
