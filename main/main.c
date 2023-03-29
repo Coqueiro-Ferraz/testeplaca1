@@ -439,11 +439,18 @@ void rotina()
 
 void set_servo_angle(int angle)
 {
+    //código do teste do servo motor
+    int i;
     int duty = (angle / 180.0) * (MAX_DUTY - MIN_DUTY) + MIN_DUTY;
-    gpio_set_level(LCD_CK, 1);
-    ets_delay_us(duty);
-    gpio_set_level(LCD_CK, 0);//servo_gpio
-    ets_delay_us(20000 - duty);
+    for (i=0;i<10;i++)
+    {
+        gpio_set_level(LCD_CK, 1);
+        ets_delay_us(duty);
+        gpio_set_level(LCD_CK, 0);//servo_gpio
+        ets_delay_us(20000 - duty);    
+    }
+    //fim do teste do servo motor
+       
 }
 
 void app_main(void)
@@ -479,20 +486,7 @@ void app_main(void)
     gpio_set_level(TEC_CK,0);
     gpio_set_level(TEC_SH_LD,0);
 
-    //código do teste do servo motor
-    /*while(1)
-    {
-        int i;
-        int j;
-        for (j=0;j<180;j++)
-        {
-            for (i=0;i<10;i++)
-            {
-                set_servo_angle(j);
-            }
-        }
-    }*/
-    //fim do teste do servo motor
+
     
     gpio_pad_select_gpio(IO_DT_WR);
     gpio_pad_select_gpio(IO_CK);
@@ -513,21 +507,21 @@ void app_main(void)
     
     for(i=0;i<7;i++)
     {
-        vTaskDelay(100 / portTICK_RATE_MS); 
+        vTaskDelay(150 / portTICK_RATE_MS); 
         lcd_write_string(" >>>HAGACEEF<<< ");
-        vTaskDelay(50 / portTICK_RATE_MS); 
+        vTaskDelay(100 / portTICK_RATE_MS); 
         lcd_write_byte (0x80,0);
         lcd_write_string("> >>HAGACEEF<< <");
-        vTaskDelay(50 / portTICK_RATE_MS); 
+        vTaskDelay(100 / portTICK_RATE_MS); 
         lcd_write_byte (0x80,0);
         lcd_write_string(">> >HAGACEEF< <<");
-        vTaskDelay(50 / portTICK_RATE_MS); 
+        vTaskDelay(100 / portTICK_RATE_MS); 
         lcd_write_byte (0x80,0);
         lcd_write_string(">>> HAGACEEF <<<");
-        vTaskDelay(50 / portTICK_RATE_MS); 
+        vTaskDelay(100 / portTICK_RATE_MS); 
         lcd_write_byte (0x80,0);
         lcd_write_string(">>>>HAGACEEF<<<<");
-        vTaskDelay(50 / portTICK_RATE_MS); 
+        vTaskDelay(100 / portTICK_RATE_MS); 
         lcd_write_byte (0x80,0);
     }
     
