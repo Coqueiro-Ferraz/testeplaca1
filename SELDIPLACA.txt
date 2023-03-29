@@ -5,10 +5,12 @@ ok	Entradas digitais
 ok	LCD
 ok	Teclado
 ok	GitHub
+	Expander - falta testar
+	ADC - falta testar
+	PWM - em comentario funcionando
+	Servo motor - cool, implementar outros angulos
 	Motor
-	ADC
 	DHT
-	Expander
 	UART via DHT
 	PWM via DHT
 	I2C via DHT

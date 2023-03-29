@@ -69,13 +69,8 @@ void app_main(void)
             }
             ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, percentual);
             ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);
-            ESP_LOGI(TAG, "Valor do PWM é %u", percentual);
         }
 
-      //  gpio_set_level(Externo, entrada);
-        status = !status;
-        gpio_set_level(Embarcado, status);
-        vTaskDelay(500 / portTICK_PERIOD_MS);
     }
 
 }*/
@@ -83,6 +78,12 @@ void app_main(void)
 #include "freertos/task.h"
 #include "driver/gpio.h"
 #include "esp_log.h"
+#include "esp_adc_cal.h"//?
+#include <stdio.h>//?
+#include "esp_system.h"//?
+#include "driver/adc.h"//?
+#include "driver/ledc.h"
+
 
 // Definições de pinos de entrada e saída via registradores
 // Strap pins para evitar: 0, 1, 2, 3, 5, 12, 15
@@ -113,6 +114,9 @@ void app_main(void)
 #define EXP_SH_LD   GPIO_NUM_33
 #define EXP_DT_WR   GPIO_NUM_25
 #define EXP_DT_RD   GPIO_NUM_26
+// Experiência com servo motor 9g
+#define SERVO_GPIO  GPIO_NUM_17
+
 
 uint8_t dado_atual;
 uint8_t linha = 1;
@@ -127,6 +131,31 @@ static const char* TAG_IO = "I/O";
 uint8_t ativado = 0;
 uint8_t entradas = 0;
 uint8_t oldEntradas = 0;
+
+
+/*
+void pwm_init(void)
+{
+    ledc_timer_config_t ledc_timer = {
+        .speed_mode = LEDC_LOW_SPEED_MODE,
+        .timer_num = LEDC_TIMER_0,
+        .duty_resolution = LEDC_TIMER_13_BIT,
+        .freq_hz = 5000,
+        .clk_cfg = LEDC_AUTO_CLK
+    };
+    ledc_timer_config(&ledc_timer);
+    ledc_channel_config_t ledc_channel = {
+        .speed_mode = LEDC_LOW_SPEED_MODE,
+        .channel = LEDC_CHANNEL_0,
+        .timer_sel = LEDC_TIMER_0,
+        .intr_type = LEDC_INTR_DISABLE,
+        .gpio_num = Externo,
+        .duty = 0,
+        .hpoint = 0
+    };
+    ledc_channel_config(&ledc_channel);
+}*/
+
 
 void Enviar_dado_lcd(uint8_t dado)
 {
@@ -147,6 +176,28 @@ void Enviar_dado_lcd(uint8_t dado)
     gpio_set_level(LCD_SH_LD, 0);
 }
 
+uint8_t Comunica_exp (uint8_t enviar)
+{
+    uint8_t recebido = 0;
+    int j;
+    gpio_set_level(EXP_SH_LD,1);
+    vTaskDelay(10 / portTICK_RATE_MS);  
+    for (j = 7; j >= 0; j--)
+    {
+        recebido <<= 1;
+        recebido += gpio_get_level(EXP_DT_RD);
+        gpio_set_level(EXP_DT_WR, ( enviar >> j ) & 1);
+        vTaskDelay(10 / portTICK_RATE_MS);
+        gpio_set_level(EXP_CK,1);
+        vTaskDelay(10 / portTICK_RATE_MS);
+        gpio_set_level(EXP_CK,0);
+        vTaskDelay(10 / portTICK_RATE_MS);
+    } 
+    gpio_set_level(EXP_SH_LD,0);
+    vTaskDelay(10 / portTICK_RATE_MS); 
+
+    return recebido;
+}
 
 
 void lcd_pulse_enable(void)
@@ -186,12 +237,12 @@ void lcd_write_string(const char *str)
 void lcd_init(void)
 {
     dado_atual = 0x00;
-    
+
     vTaskDelay(15 / portTICK_RATE_MS); 
 
-    gpio_set_direction(LCD_DT_WR, GPIO_MODE_OUTPUT);
-    gpio_set_direction(LCD_SH_LD, GPIO_MODE_OUTPUT);
-    gpio_set_direction(LCD_CK, GPIO_MODE_OUTPUT);
+  //  gpio_set_direction(LCD_DT_WR, GPIO_MODE_OUTPUT);
+  //  gpio_set_direction(LCD_SH_LD, GPIO_MODE_OUTPUT);
+  //  gpio_set_direction(LCD_CK, GPIO_MODE_OUTPUT);
 
     vTaskDelay(15 / portTICK_RATE_MS);
 
@@ -346,6 +397,14 @@ void selTec()
     }
     Ativa_tudo(ativado);
 }
+
+void chama_adc()
+{
+    int valor = 0;
+    valor = adc1_get_raw(ADC1_CHANNEL_0);
+    printf("ADC1:%d\n", valor);
+}
+
 void rotina()
 {
     while (1)
@@ -362,6 +421,8 @@ void rotina()
         
         vTaskDelay(200 / portTICK_RATE_MS); 
 
+        chama_adc();
+
         selTec();
         vTaskDelay(10 / portTICK_RATE_MS); 
         lcd_write_byte(0x80,0);
@@ -371,6 +432,20 @@ void rotina()
      
     }
 }
+
+// Min Pulse = 1000us, max pulse = 2000us
+#define MAX_DUTY 2000
+#define MIN_DUTY 1000
+
+void set_servo_angle(int angle)
+{
+    int duty = (angle / 180.0) * (MAX_DUTY - MIN_DUTY) + MIN_DUTY;
+    gpio_set_level(LCD_CK, 1);
+    ets_delay_us(duty);
+    gpio_set_level(LCD_CK, 0);//servo_gpio
+    ets_delay_us(20000 - duty);
+}
+
 void app_main(void)
 {
     int i;
@@ -378,6 +453,11 @@ void app_main(void)
     gpio_pad_select_gpio(LCD_CK);
     gpio_pad_select_gpio(LCD_SH_LD);
 
+  gpio_set_direction(LCD_DT_WR, GPIO_MODE_OUTPUT);
+  gpio_set_direction(LCD_SH_LD, GPIO_MODE_OUTPUT);
+  gpio_set_direction(LCD_CK, GPIO_MODE_OUTPUT);
+
+  gpio_set_level(LCD_CK, 0);
 
     gpio_pad_select_gpio(TEC_DT_WR);
     gpio_pad_select_gpio(TEC_CK);
@@ -399,6 +479,20 @@ void app_main(void)
     gpio_set_level(TEC_CK,0);
     gpio_set_level(TEC_SH_LD,0);
 
+    //código do teste do servo motor
+    /*while(1)
+    {
+        int i;
+        int j;
+        for (j=0;j<180;j++)
+        {
+            for (i=0;i<10;i++)
+            {
+                set_servo_angle(j);
+            }
+        }
+    }*/
+    //fim do teste do servo motor
     
     gpio_pad_select_gpio(IO_DT_WR);
     gpio_pad_select_gpio(IO_CK);
@@ -410,6 +504,9 @@ void app_main(void)
     gpio_set_level(IO_DT_WR,0);
     gpio_set_level(IO_CK,0);
     gpio_set_level(IO_SH_LD,0);
+ 
+    adc1_config_width(ADC_WIDTH_BIT_12);
+    adc1_config_channel_atten(ADC1_CHANNEL_0, ADC_ATTEN_DB_11);
     
     vTaskDelay(200 / portTICK_RATE_MS); 
     lcd_init();
@@ -437,7 +534,7 @@ void app_main(void)
     vTaskDelay(500 / portTICK_RATE_MS); 
     lcd_clear();
 
-    flagMudou = 1;
+    
 
     xTaskCreate(&le_teclado_2,"Leitura do teclado",2048,NULL,2,NULL);
     xTaskCreate(&rotina,"Rotina",2048,NULL,3,NULL);
