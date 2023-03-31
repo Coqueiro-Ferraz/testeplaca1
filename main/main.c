@@ -115,8 +115,10 @@ void app_main(void)
 #define EXP_DT_WR   GPIO_NUM_25
 #define EXP_DT_RD   GPIO_NUM_26
 // Experiência com servo motor 9g
-#define SERVO_GPIO  GPIO_NUM_17
-
+//#define SERVO_GPIO  GPIO_NUM_17
+// Para o micro servo motor Min Pulse = 1000us, max pulse = 2000us
+#define MAX_DUTY 2000
+#define MIN_DUTY 1000
 
 uint8_t dado_atual;
 uint8_t linha = 1;
@@ -129,6 +131,7 @@ static const char* TAG_LCD = "LCD";
 static const char* TAG_TEC = "TEC";
 static const char* TAG_IO = "I/O";
 uint8_t ativado = 0;
+int angulo = 0;
 uint8_t entradas = 0;
 uint8_t oldEntradas = 0;
 
@@ -156,6 +159,22 @@ void pwm_init(void)
     ledc_channel_config(&ledc_channel);
 }*/
 
+
+void set_servo_angle(int angle)
+{
+    //código do teste do servo motor
+    int i;
+    int duty = (angle / 180.0) * (MAX_DUTY - MIN_DUTY) + MIN_DUTY;
+    for (i=0;i<10;i++)
+    {
+        gpio_set_level(EXP_CK, 1);
+        ets_delay_us(duty);
+        gpio_set_level(EXP_CK, 0);//servo_gpio
+        ets_delay_us(20000 - duty);    
+    }
+    //fim do teste do servo motor
+       
+}
 
 void Enviar_dado_lcd(uint8_t dado)
 {
@@ -348,6 +367,7 @@ void le_teclado_2 ()
 
 void selTec()
 {
+    
     switch (mostra)
     {
         case 10: tecla = '1';
@@ -360,16 +380,20 @@ void selTec()
                 ativado |= 0x04;
                 break;  
         case 13: tecla = '-';
+                if(angulo>0)angulo--;
                 break; 
         case 20: tecla = 'C';
                 lcd_init();
                 break; 
         case 21: tecla = '0';
-                ativado = 0;
+                ativado = 0;                
+                angulo = 0;
                 break; 
         case 22: tecla = '=';
+                angulo = 90;
                 break; 
         case 23: tecla = '+';
+                if(angulo<180)angulo++;
                 break; 
         case 40: tecla = '7';
                 ativado |= 0x40;
@@ -378,6 +402,7 @@ void selTec()
                 ativado |= 0x80;
                 break; 
         case 42: tecla = '9';
+                angulo = 180;
                 break; 
         case 43: tecla = '/';
                 break;
@@ -396,6 +421,7 @@ void selTec()
                 break;                
     }
     Ativa_tudo(ativado);
+    set_servo_angle(angulo);
 }
 
 void chama_adc()
@@ -433,25 +459,7 @@ void rotina()
     }
 }
 
-// Min Pulse = 1000us, max pulse = 2000us
-#define MAX_DUTY 2000
-#define MIN_DUTY 1000
 
-void set_servo_angle(int angle)
-{
-    //código do teste do servo motor
-    int i;
-    int duty = (angle / 180.0) * (MAX_DUTY - MIN_DUTY) + MIN_DUTY;
-    for (i=0;i<10;i++)
-    {
-        gpio_set_level(LCD_CK, 1);
-        ets_delay_us(duty);
-        gpio_set_level(LCD_CK, 0);//servo_gpio
-        ets_delay_us(20000 - duty);    
-    }
-    //fim do teste do servo motor
-       
-}
 
 void app_main(void)
 {
