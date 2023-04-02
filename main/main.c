@@ -1,79 +1,3 @@
-/*#include <stdio.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "esp_system.h"
-#include "esp_spi_flash.h"
-#include "driver/gpio.h"
-#include "driver/ledc.h"
-#include "esp_log.h"
-
-#define Embarcado 13
-#define Externo 2
-#define BT_PIN 34
-
-static const char* TAG = "PWM";
-
-void pwm_init(void)
-{
-    ledc_timer_config_t ledc_timer = {
-        .speed_mode = LEDC_LOW_SPEED_MODE,
-        .timer_num = LEDC_TIMER_0,
-        .duty_resolution = LEDC_TIMER_13_BIT,
-        .freq_hz = 5000,
-        .clk_cfg = LEDC_AUTO_CLK
-    };
-    ledc_timer_config(&ledc_timer);
-    ledc_channel_config_t ledc_channel = {
-        .speed_mode = LEDC_LOW_SPEED_MODE,
-        .channel = LEDC_CHANNEL_0,
-        .timer_sel = LEDC_TIMER_0,
-        .intr_type = LEDC_INTR_DISABLE,
-        .gpio_num = Externo,
-        .duty = 0,
-        .hpoint = 0
-    };
-    ledc_channel_config(&ledc_channel);
-
-}
-
-
-
-
-void app_main(void)
-{
-    pwm_init();
-    ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, 100);
-    ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);
-    gpio_pad_select_gpio(BT_PIN);
-    gpio_set_direction (BT_PIN, GPIO_MODE_INPUT); 
-   // gpio_pad_select_gpio(Externo);
-   // gpio_set_direction (Externo, GPIO_MODE_OUTPUT);    
-    gpio_pad_select_gpio(Embarcado);
-    gpio_set_direction (Embarcado, GPIO_MODE_OUTPUT);    
-    bool status = 0;
-    bool entrada = 0;
-    uint percentual = 0;
-
-    while(1)
-    {
-        entrada = gpio_get_level(BT_PIN);
-        if(entrada==true)
-        {
-            if(percentual>7000)
-            {
-                percentual = 0;
-            }
-            else
-            {
-                percentual += 1000;
-            }
-            ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, percentual);
-            ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);
-        }
-
-    }
-
-}*/
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "driver/gpio.h"
@@ -136,7 +60,7 @@ uint8_t entradas = 0;
 uint8_t oldEntradas = 0;
 
 
-/*
+/* //função PWM
 void pwm_init(void)
 {
     ledc_timer_config_t ledc_timer = {
@@ -157,9 +81,44 @@ void pwm_init(void)
         .hpoint = 0
     };
     ledc_channel_config(&ledc_channel);
-}*/
+}
+void app_main(void)
+{
+    pwm_init();
+    ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, 100);
+    ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);
+    gpio_pad_select_gpio(BT_PIN);
+    gpio_set_direction (BT_PIN, GPIO_MODE_INPUT); 
+   // gpio_pad_select_gpio(Externo);
+   // gpio_set_direction (Externo, GPIO_MODE_OUTPUT);    
+    gpio_pad_select_gpio(Embarcado);
+    gpio_set_direction (Embarcado, GPIO_MODE_OUTPUT);    
+    bool status = 0;
+    bool entrada = 0;
+    uint percentual = 0;
 
+    while(1)
+    {
+        entrada = gpio_get_level(BT_PIN);
+        if(entrada==true)
+        {
+            if(percentual>7000)
+            {
+                percentual = 0;
+            }
+            else
+            {
+                percentual += 1000;
+            }
+            ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, percentual);
+            ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);
+        }
 
+    }
+
+}
+
+*/
 void set_servo_angle(int angle)
 {
     //código do teste do servo motor
@@ -195,25 +154,25 @@ void Enviar_dado_lcd(uint8_t dado)
     gpio_set_level(LCD_SH_LD, 0);
 }
 
-uint8_t Comunica_exp (uint8_t enviar)
+uint8_t Comunica_exp (uint8_t enviar)//>26 microssegundos
 {
     uint8_t recebido = 0;
     int j;
     gpio_set_level(EXP_SH_LD,1);
-    vTaskDelay(10 / portTICK_RATE_MS);  
+    ets_delay_us(1);  
     for (j = 7; j >= 0; j--)
     {
         recebido <<= 1;
         recebido += gpio_get_level(EXP_DT_RD);
         gpio_set_level(EXP_DT_WR, ( enviar >> j ) & 1);
-        vTaskDelay(10 / portTICK_RATE_MS);
+        ets_delay_us(1);  
         gpio_set_level(EXP_CK,1);
-        vTaskDelay(10 / portTICK_RATE_MS);
+        ets_delay_us(1);  
         gpio_set_level(EXP_CK,0);
-        vTaskDelay(10 / portTICK_RATE_MS);
+        ets_delay_us(1);  
     } 
     gpio_set_level(EXP_SH_LD,0);
-    vTaskDelay(10 / portTICK_RATE_MS); 
+    ets_delay_us(1);  
 
     return recebido;
 }
@@ -302,21 +261,41 @@ void Ativa_tudo(uint8_t estado)
 {
     int j;
     gpio_set_level(IO_SH_LD,1);
-    vTaskDelay(10 / portTICK_RATE_MS);  
+    ets_delay_us(10); //vTaskDelay(10 / portTICK_RATE_MS);  
     for (j = 7; j >= 0; j--)
     {
         entradas <<= 1;
         entradas += gpio_get_level(IO_DT_RD);
         gpio_set_level(IO_DT_WR, ( estado >> j ) & 1);
-        vTaskDelay(10 / portTICK_RATE_MS);
+        ets_delay_us(10); //vTaskDelay(10 / portTICK_RATE_MS);
         gpio_set_level(IO_CK,1);
-        vTaskDelay(10 / portTICK_RATE_MS);
+        ets_delay_us(10); //vTaskDelay(10 / portTICK_RATE_MS);
         gpio_set_level(IO_CK,0);
-        vTaskDelay(10 / portTICK_RATE_MS);
+        ets_delay_us(10); //vTaskDelay(10 / portTICK_RATE_MS);
     } 
     gpio_set_level(IO_SH_LD,0);
-    vTaskDelay(10 / portTICK_RATE_MS); 
+    ets_delay_us(10); //vTaskDelay(10 / portTICK_RATE_MS); 
 
+}
+
+void motor_avanca (int passos)
+{
+    int i,j;
+    uint8_t steps [8] = {0x80,0xC0,0x40,0x60,0x20,0x30,0x10,0x90};
+    ativado &= 0x0F;
+    for (j=0;j<passos;j++)
+    {
+        for(i=0;i<8;i++)
+        {
+            ativado |= steps[i];
+            Ativa_tudo(ativado);
+            vTaskDelay(200 / portTICK_RATE_MS);
+        }
+    }
+    mostra = 0;
+    ativado &= 0x0F;
+    Ativa_tudo(ativado);
+    vTaskDelay(10 / portTICK_RATE_MS);
 }
 
 void setalinha_2(void)
@@ -394,6 +373,7 @@ void selTec()
                 break; 
         case 23: tecla = '+';
                 if(angulo<180)angulo++;
+                motor_avanca(64);
                 break; 
         case 40: tecla = '7';
                 ativado |= 0x40;
