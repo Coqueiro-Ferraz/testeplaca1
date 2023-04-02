@@ -8,8 +8,8 @@ ok	GitHub
 	Expander - falta testar
 	ADC - falta testar
 	PWM - em comentario funcionando
-	Servo motor - cool, implementar porta de saída
-	Motor de passo 28BYJ-48 - tentar nos transístores, sem driver
+	Servo motor - falta ajustar min e max duty
+ok	Motor de passo 28BYJ-48 - tentar nos transístores
 	Motor Nema17 - via controlador DRV8825
 	DHT
 	UART via DHT

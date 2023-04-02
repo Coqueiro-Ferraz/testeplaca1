@@ -41,7 +41,7 @@
 // Experiência com servo motor 9g
 //#define SERVO_GPIO  GPIO_NUM_17
 // Para o micro servo motor Min Pulse = 1000us, max pulse = 2000us
-#define MAX_DUTY 2000
+#define MAX_DUTY 2500
 #define MIN_DUTY 1000
 
 uint8_t dado_atual;
@@ -287,9 +287,10 @@ void motor_avanca (int passos)
     {
         for(i=0;i<8;i++)
         {
+            ativado &= 0x0F;
             ativado |= steps[i];
             Ativa_tudo(ativado);
-            vTaskDelay(200 / portTICK_RATE_MS);
+            vTaskDelay(10 / portTICK_RATE_MS);
         }
     }
     mostra = 0;
@@ -371,9 +372,9 @@ void selTec()
         case 22: tecla = '=';
                 angulo = 90;
                 break; 
-        case 23: tecla = '+';
-                if(angulo<180)angulo++;
+        case 23: if(angulo<180)angulo++;
                 motor_avanca(64);
+                tecla = '+';
                 break; 
         case 40: tecla = '7';
                 ativado |= 0x40;
@@ -454,18 +455,20 @@ void app_main(void)
 
   gpio_set_level(LCD_CK, 0);
 
-    gpio_pad_select_gpio(TEC_DT_WR);
-    gpio_pad_select_gpio(TEC_CK);
-    gpio_pad_select_gpio(TEC_SH_LD);
-    gpio_pad_select_gpio(TEC_DT_WR);
 
 
+/**/
     vTaskDelay(10 / portTICK_RATE_MS); 
    // lcd_write_byte(0xC0,0);
     vTaskDelay(10 / portTICK_RATE_MS); 
     //lcd_write_string("SENAI SELDI/MSEL");
     vTaskDelay(200 / portTICK_RATE_MS); 
-    //lcd_clear();
+    //lcd_clear();*/
+
+    gpio_pad_select_gpio(TEC_DT_WR);
+    gpio_pad_select_gpio(TEC_CK);
+    gpio_pad_select_gpio(TEC_SH_LD);
+    gpio_pad_select_gpio(TEC_DT_WR);
     gpio_set_direction(TEC_DT_WR, GPIO_MODE_OUTPUT);
     gpio_set_direction(TEC_SH_LD, GPIO_MODE_OUTPUT);
     gpio_set_direction(TEC_CK, GPIO_MODE_OUTPUT);
@@ -474,6 +477,17 @@ void app_main(void)
     gpio_set_level(TEC_CK,0);
     gpio_set_level(TEC_SH_LD,0);
 
+    gpio_pad_select_gpio(EXP_DT_WR);
+    gpio_pad_select_gpio(EXP_CK);
+    gpio_pad_select_gpio(EXP_SH_LD);
+    gpio_pad_select_gpio(EXP_DT_WR);
+    gpio_set_direction(EXP_DT_WR, GPIO_MODE_OUTPUT);
+    gpio_set_direction(EXP_SH_LD, GPIO_MODE_OUTPUT);
+    gpio_set_direction(EXP_CK, GPIO_MODE_OUTPUT);
+    gpio_set_direction(EXP_DT_RD, GPIO_MODE_INPUT);
+    gpio_set_level(EXP_DT_WR,0);
+    gpio_set_level(EXP_CK,0);
+    gpio_set_level(EXP_SH_LD,0);
 
     
     gpio_pad_select_gpio(IO_DT_WR);
@@ -496,19 +510,19 @@ void app_main(void)
     for(i=0;i<7;i++)
     {
         vTaskDelay(150 / portTICK_RATE_MS); 
-        lcd_write_string(" >>>HAGACEEF<<< ");
+        lcd_write_string(">   HAGACEEF   <");
         vTaskDelay(100 / portTICK_RATE_MS); 
         lcd_write_byte (0x80,0);
-        lcd_write_string("> >>HAGACEEF<< <");
+        lcd_write_string(" >  HAGACEEF  < ");
         vTaskDelay(100 / portTICK_RATE_MS); 
         lcd_write_byte (0x80,0);
-        lcd_write_string(">> >HAGACEEF< <<");
+        lcd_write_string("  > HAGACEEF <  ");
         vTaskDelay(100 / portTICK_RATE_MS); 
         lcd_write_byte (0x80,0);
-        lcd_write_string(">>> HAGACEEF <<<");
+        lcd_write_string("   >HAGACEEF<   ");
         vTaskDelay(100 / portTICK_RATE_MS); 
         lcd_write_byte (0x80,0);
-        lcd_write_string(">>>>HAGACEEF<<<<");
+        lcd_write_string("    HAGACEEF    ");
         vTaskDelay(100 / portTICK_RATE_MS); 
         lcd_write_byte (0x80,0);
     }
