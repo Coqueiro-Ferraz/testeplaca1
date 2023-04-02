@@ -1,9 +1,5 @@
 {
-<<<<<<< HEAD
     "idf.portWin": "COM5",
-=======
-    "idf.portWin": "COM7",
->>>>>>> 894ad7a3e94e7ffa727c8fe2eed77f22bec5458f
     "idf.flashType": "UART",
     "idf.adapterTargetName": "esp32"
 }
