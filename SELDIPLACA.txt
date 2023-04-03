@@ -7,8 +7,8 @@ ok	Teclado
 ok	GitHub
 	Expander - falta testar
 	ADC - falta testar
-	PWM - em comentario funcionando
-	Servo motor - falta ajustar min e max duty
+ok	PWM - comentado funcionando
+ok	Servo motor - falta ajustar min e max duty
 ok	Motor de passo 28BYJ-48 - tentar nos transístores
 	Motor Nema17 - via controlador DRV8825
 	DHT
@@ -18,7 +18,9 @@ ok	Motor de passo 28BYJ-48 - tentar nos transístores
 	SPI via DHT e EXP
 	DAC? via DHT
 	7 segmentos via Expander
-	Apresentação
+ok	Apresentação
+	Menu de contexto
+	Interrupções
 	Wi-fi
 	BT
 	Foto célula

@@ -42,7 +42,7 @@
 //#define SERVO_GPIO  GPIO_NUM_17
 // Para o micro servo motor Min Pulse = 1000us, max pulse = 2000us
 #define MAX_DUTY 2500
-#define MIN_DUTY 1000
+#define MIN_DUTY 500
 
 uint8_t dado_atual;
 uint8_t linha = 1;
@@ -360,7 +360,7 @@ void selTec()
                 ativado |= 0x04;
                 break;  
         case 13: tecla = '-';
-                if(angulo>0)angulo--;
+                if(angulo>10)angulo-=10;
                 break; 
         case 20: tecla = 'C';
                 lcd_init();
@@ -372,7 +372,7 @@ void selTec()
         case 22: tecla = '=';
                 angulo = 90;
                 break; 
-        case 23: if(angulo<180)angulo++;
+        case 23: if(angulo<170)angulo+=10;
                 motor_avanca(64);
                 tecla = '+';
                 break; 
@@ -506,27 +506,54 @@ void app_main(void)
     
     vTaskDelay(200 / portTICK_RATE_MS); 
     lcd_init();
-    
-    for(i=0;i<7;i++)
+    vTaskDelay(200 / portTICK_RATE_MS); 
+
+    for(i=0;i<4;i++)
     {
-        vTaskDelay(150 / portTICK_RATE_MS); 
         lcd_write_string(">   HAGACEEF   <");
-        vTaskDelay(100 / portTICK_RATE_MS); 
+        vTaskDelay(70 / portTICK_RATE_MS); 
+        lcd_write_byte (0x80,0);
+        lcd_write_string(">>  HAGACEEF  <<");
+        vTaskDelay(10 / portTICK_RATE_MS); 
         lcd_write_byte (0x80,0);
         lcd_write_string(" >  HAGACEEF  < ");
-        vTaskDelay(100 / portTICK_RATE_MS); 
+        vTaskDelay(70 / portTICK_RATE_MS); 
+        lcd_write_byte (0x80,0);
+        lcd_write_string(" >> HAGACEEF << ");
+        vTaskDelay(10 / portTICK_RATE_MS); 
         lcd_write_byte (0x80,0);
         lcd_write_string("  > HAGACEEF <  ");
-        vTaskDelay(100 / portTICK_RATE_MS); 
+        vTaskDelay(70 / portTICK_RATE_MS); 
+        lcd_write_byte (0x80,0);
+        lcd_write_string("  >>HAGACEEF<<  ");
+        vTaskDelay(10 / portTICK_RATE_MS); 
         lcd_write_byte (0x80,0);
         lcd_write_string("   >HAGACEEF<   ");
-        vTaskDelay(100 / portTICK_RATE_MS); 
+        vTaskDelay(80 / portTICK_RATE_MS); 
         lcd_write_byte (0x80,0);
         lcd_write_string("    HAGACEEF    ");
         vTaskDelay(100 / portTICK_RATE_MS); 
         lcd_write_byte (0x80,0);
     }
-    
+    lcd_write_string("   HAGA()CEEF   ");
+    vTaskDelay(10 / portTICK_RATE_MS); 
+    lcd_write_byte (0x80,0);
+    lcd_write_string(" H AG (()) EE F ");
+    vTaskDelay(10 / portTICK_RATE_MS); 
+    lcd_write_byte (0x80,0);
+    lcd_write_string("( ( (( () )) ) )");
+    vTaskDelay(10 / portTICK_RATE_MS); 
+    lcd_write_byte (0x80,0);
+    lcd_write_string("((((((    ))))))");
+    vTaskDelay(10 / portTICK_RATE_MS); 
+    lcd_write_byte (0x80,0);
+    lcd_write_string("(((          )))");
+    vTaskDelay(10 / portTICK_RATE_MS); 
+    lcd_write_byte (0x80,0);        
+    lcd_write_string("(              )");
+    vTaskDelay(10 / portTICK_RATE_MS); 
+    lcd_write_byte (0x80,0);
+
     vTaskDelay(500 / portTICK_RATE_MS); 
     lcd_clear();
 
