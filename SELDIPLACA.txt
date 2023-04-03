@@ -21,7 +21,7 @@ ok	Motor de passo 28BYJ-48 - tentar nos transístores
 ok	Apresentação
 	Menu de contexto
 	Interrupções
-	Wi-fi
+	Wi-fi -> PAREI NO MINUTO 53 DA AULA 7-1
 	BT
 	Foto célula
 	Fan Speed

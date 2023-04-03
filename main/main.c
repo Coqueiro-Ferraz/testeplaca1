@@ -7,7 +7,8 @@
 #include "esp_system.h"//?
 #include "driver/adc.h"//?
 #include "driver/ledc.h"
-
+#include "connect.h"
+#include "nvs_flash.h"
 
 // Definições de pinos de entrada e saída via registradores
 // Strap pins para evitar: 0, 1, 2, 3, 5, 12, 15
@@ -43,6 +44,8 @@
 // Para o micro servo motor Min Pulse = 1000us, max pulse = 2000us
 #define MAX_DUTY 2500
 #define MIN_DUTY 500
+
+#define TAG_WIFI "WIFI CON"
 
 uint8_t dado_atual;
 uint8_t linha = 1;
@@ -327,7 +330,7 @@ void le_teclado_2 ()
                 {
                     coluna = i;
                     mostra = linha * 10 + coluna;
-                    ESP_LOGI("captura", "L %i - C %i", linha, coluna);
+                  //  ESP_LOGI("captura", "L %i - C %i", linha, coluna);
                     vTaskDelay(100 / portTICK_RATE_MS);
                 }
             }
@@ -420,7 +423,7 @@ void rotina()
         int i;
         exibe[8] = 0;
 
-        ESP_LOGE("capturado", "%i", mostra);
+    //    ESP_LOGE("capturado", "%i", mostra);
         for(i=0;i<8;i++)
         {
             exibe[i] = ((entradas >> i) & 1) + 48;
@@ -428,7 +431,7 @@ void rotina()
         
         vTaskDelay(200 / portTICK_RATE_MS); 
 
-        chama_adc();
+        //chama_adc();
 
         selTec();
         vTaskDelay(10 / portTICK_RATE_MS); 
@@ -440,20 +443,39 @@ void rotina()
     }
 }
 
-
+void wifi_connect_task (void *args)
+{
+    esp_err_t err = wifi_connect_sta("Hcflaf", "$4Xcoqueiro", 10000);
+    if(err)
+    {
+        ESP_LOGE( TAG_WIFI, "Conexao falhou");
+        vTaskDelete(NULL);
+    }
+    printf("aguardando... \n");
+    vTaskDelay(5000 / portTICK_RATE_MS);
+    wifi_disconnect();
+    vTaskDelete(NULL);
+}
 
 void app_main(void)
 {
     int i;
+
+    ESP_ERROR_CHECK(nvs_flash_init());
+    wifi_init();
+    xTaskCreate(wifi_connect_task, "wifi_connect_task", 1024*5, NULL, 5, NULL);
+
+
+
     gpio_pad_select_gpio(LCD_DT_WR);
     gpio_pad_select_gpio(LCD_CK);
     gpio_pad_select_gpio(LCD_SH_LD);
 
-  gpio_set_direction(LCD_DT_WR, GPIO_MODE_OUTPUT);
-  gpio_set_direction(LCD_SH_LD, GPIO_MODE_OUTPUT);
-  gpio_set_direction(LCD_CK, GPIO_MODE_OUTPUT);
+    gpio_set_direction(LCD_DT_WR, GPIO_MODE_OUTPUT);
+    gpio_set_direction(LCD_SH_LD, GPIO_MODE_OUTPUT);
+    gpio_set_direction(LCD_CK, GPIO_MODE_OUTPUT);
 
-  gpio_set_level(LCD_CK, 0);
+    gpio_set_level(LCD_CK, 0);
 
 
 
