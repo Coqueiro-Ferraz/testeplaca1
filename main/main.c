@@ -465,8 +465,6 @@ void app_main(void)
     wifi_init();
     xTaskCreate(wifi_connect_task, "wifi_connect_task", 1024*5, NULL, 5, NULL);
 
-
-
     gpio_pad_select_gpio(LCD_DT_WR);
     gpio_pad_select_gpio(LCD_CK);
     gpio_pad_select_gpio(LCD_SH_LD);
@@ -477,9 +475,7 @@ void app_main(void)
 
     gpio_set_level(LCD_CK, 0);
 
-
-
-/**/
+/*
     vTaskDelay(10 / portTICK_RATE_MS); 
    // lcd_write_byte(0xC0,0);
     vTaskDelay(10 / portTICK_RATE_MS); 

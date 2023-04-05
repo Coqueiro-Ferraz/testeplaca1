@@ -26,3 +26,4 @@ ok	Apresentação
 	Foto célula
 	Fan Speed
 	Emissor de senhas projeto final
+	Organizar em bibliotecas
