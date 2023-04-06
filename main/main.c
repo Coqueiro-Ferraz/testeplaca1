@@ -218,6 +218,7 @@ void lcd_write_string(const char *str)
 
 void lcd_init(void)
 {
+    vTaskDelay(200 / portTICK_RATE_MS); 
     dado_atual = 0x00;
 
     vTaskDelay(15 / portTICK_RATE_MS); 
@@ -253,6 +254,7 @@ void lcd_init(void)
     lcd_write_byte(0x01, 0);
     vTaskDelay(2 / portTICK_RATE_MS);
     dado_atual = 0x00;
+    vTaskDelay(200 / portTICK_RATE_MS); 
 }
 
 void lcd_clear(void)
@@ -458,77 +460,9 @@ void wifi_connect_task (void *args)
     vTaskDelete(NULL);
 }
 
-void app_main(void)
+void apresenta()
 {
     int i;
-
-    ESP_ERROR_CHECK(nvs_flash_init());
-    wifi_init();
-    xTaskCreate(wifi_connect_task, "wifi_connect_task", 1024*5, NULL, 5, NULL);
-    ioinit();
-
-/*
-    gpio_pad_select_gpio(LCD_DT_WR);
-    gpio_pad_select_gpio(LCD_CK);
-    gpio_pad_select_gpio(LCD_SH_LD);
-
-    gpio_set_direction(LCD_DT_WR, GPIO_MODE_OUTPUT);
-    gpio_set_direction(LCD_SH_LD, GPIO_MODE_OUTPUT);
-    gpio_set_direction(LCD_CK, GPIO_MODE_OUTPUT);
-
-    gpio_set_level(LCD_CK, 0);
-*/
-/*
-    vTaskDelay(10 / portTICK_RATE_MS); 
-   // lcd_write_byte(0xC0,0);
-    vTaskDelay(10 / portTICK_RATE_MS); 
-    //lcd_write_string("SENAI SELDI/MSEL");
-    vTaskDelay(200 / portTICK_RATE_MS); 
-    //lcd_clear();*/
-/*
-    gpio_pad_select_gpio(TEC_DT_WR);
-    gpio_pad_select_gpio(TEC_CK);
-    gpio_pad_select_gpio(TEC_SH_LD);
-    gpio_pad_select_gpio(TEC_DT_WR);
-    gpio_set_direction(TEC_DT_WR, GPIO_MODE_OUTPUT);
-    gpio_set_direction(TEC_SH_LD, GPIO_MODE_OUTPUT);
-    gpio_set_direction(TEC_CK, GPIO_MODE_OUTPUT);
-    gpio_set_direction(TEC_DT_RD, GPIO_MODE_INPUT);
-    gpio_set_level(TEC_DT_WR,0);
-    gpio_set_level(TEC_CK,0);
-    gpio_set_level(TEC_SH_LD,0);
-
-    gpio_pad_select_gpio(EXP_DT_WR);
-    gpio_pad_select_gpio(EXP_CK);
-    gpio_pad_select_gpio(EXP_SH_LD);
-    gpio_pad_select_gpio(EXP_DT_WR);
-    gpio_set_direction(EXP_DT_WR, GPIO_MODE_OUTPUT);
-    gpio_set_direction(EXP_SH_LD, GPIO_MODE_OUTPUT);
-    gpio_set_direction(EXP_CK, GPIO_MODE_OUTPUT);
-    gpio_set_direction(EXP_DT_RD, GPIO_MODE_INPUT);
-    gpio_set_level(EXP_DT_WR,0);
-    gpio_set_level(EXP_CK,0);
-    gpio_set_level(EXP_SH_LD,0);
-
-    
-    gpio_pad_select_gpio(IO_DT_WR);
-    gpio_pad_select_gpio(IO_CK);
-    gpio_pad_select_gpio(IO_SH_LD);
-    gpio_set_direction(IO_DT_WR, GPIO_MODE_OUTPUT);
-    gpio_set_direction(IO_SH_LD, GPIO_MODE_OUTPUT);
-    gpio_set_direction(IO_CK, GPIO_MODE_OUTPUT);
-    gpio_set_direction(IO_DT_RD, GPIO_MODE_INPUT);
-    gpio_set_level(IO_DT_WR,0);
-    gpio_set_level(IO_CK,0);
-    gpio_set_level(IO_SH_LD,0);
- */
-    adc1_config_width(ADC_WIDTH_BIT_12);
-    adc1_config_channel_atten(ADC1_CHANNEL_0, ADC_ATTEN_DB_11);
-    
-    vTaskDelay(200 / portTICK_RATE_MS); 
-    lcd_init();
-    vTaskDelay(200 / portTICK_RATE_MS); 
-
     for(i=0;i<4;i++)
     {
         lcd_write_string(">   HAGACEEF   <");
@@ -577,8 +511,21 @@ void app_main(void)
 
     vTaskDelay(500 / portTICK_RATE_MS); 
     lcd_clear();
+}
 
+void app_main(void)
+{
+    ESP_ERROR_CHECK(nvs_flash_init());
+    wifi_init();
+    xTaskCreate(wifi_connect_task, "wifi_connect_task", 1024*5, NULL, 5, NULL);
+    ioinit();
+
+    adc1_config_width(ADC_WIDTH_BIT_12);
+    adc1_config_channel_atten(ADC1_CHANNEL_0, ADC_ATTEN_DB_11);
     
+    lcd_init();
+
+    apresenta();
 
     xTaskCreate(&le_teclado_2,"Leitura do teclado",2048,NULL,2,NULL);
     xTaskCreate(&rotina,"Rotina",2048,NULL,3,NULL);
