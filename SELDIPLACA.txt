@@ -26,4 +26,4 @@ ok	Apresentação
 	Foto célula
 	Fan Speed
 	Emissor de senhas projeto final
-	Organizar em bibliotecas
+	Organizar em bibliotecas - wifi connect e ioplaca ok

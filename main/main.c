@@ -9,6 +9,7 @@
 #include "driver/ledc.h"
 #include "connect.h"
 #include "nvs_flash.h"
+#include "ioplaca.h"
 
 // Definições de pinos de entrada e saída via registradores
 // Strap pins para evitar: 0, 1, 2, 3, 5, 12, 15
@@ -464,7 +465,9 @@ void app_main(void)
     ESP_ERROR_CHECK(nvs_flash_init());
     wifi_init();
     xTaskCreate(wifi_connect_task, "wifi_connect_task", 1024*5, NULL, 5, NULL);
+    ioinit();
 
+/*
     gpio_pad_select_gpio(LCD_DT_WR);
     gpio_pad_select_gpio(LCD_CK);
     gpio_pad_select_gpio(LCD_SH_LD);
@@ -474,7 +477,7 @@ void app_main(void)
     gpio_set_direction(LCD_CK, GPIO_MODE_OUTPUT);
 
     gpio_set_level(LCD_CK, 0);
-
+*/
 /*
     vTaskDelay(10 / portTICK_RATE_MS); 
    // lcd_write_byte(0xC0,0);
@@ -482,7 +485,7 @@ void app_main(void)
     //lcd_write_string("SENAI SELDI/MSEL");
     vTaskDelay(200 / portTICK_RATE_MS); 
     //lcd_clear();*/
-
+/*
     gpio_pad_select_gpio(TEC_DT_WR);
     gpio_pad_select_gpio(TEC_CK);
     gpio_pad_select_gpio(TEC_SH_LD);
@@ -518,7 +521,7 @@ void app_main(void)
     gpio_set_level(IO_DT_WR,0);
     gpio_set_level(IO_CK,0);
     gpio_set_level(IO_SH_LD,0);
- 
+ */
     adc1_config_width(ADC_WIDTH_BIT_12);
     adc1_config_channel_atten(ADC1_CHANNEL_0, ADC_ATTEN_DB_11);
     
