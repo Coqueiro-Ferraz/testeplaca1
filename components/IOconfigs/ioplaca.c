@@ -3,6 +3,7 @@
 #include "freertos/task.h"
 #include "esp_log.h"
 #include <stdio.h>
+#include <string.h>
 #include "esp_system.h"
 
 // LCD -> fazer o aterramento dos pinos flutuantes, 2 bits menos significativos inutilizados
@@ -28,6 +29,167 @@
 #define EXP_SH_LD   GPIO_NUM_33
 #define EXP_DT_WR   GPIO_NUM_25
 #define EXP_DT_RD   GPIO_NUM_26
+
+char le_teclado ()
+{        
+    int i,j;
+    uint8_t linha = 0b1000;
+    uint8_t coluna = 0; 
+    uint8_t mostra;
+    char tecla = '_';
+
+    for (j = 0; j < 4; j++)
+    {
+        gpio_set_level(TEC_SH_LD,1);
+
+        for(i = 7; i >= 0; i--)
+        {    
+            if(i < 4 )
+            {
+                if(gpio_get_level(TEC_DT_RD) == 1)
+                {
+                    coluna = i;
+                    mostra = linha * 10 + coluna;
+                    //  ESP_LOGI("captura", "L %i - C %i", linha, coluna);
+                    vTaskDelay(100 / portTICK_RATE_MS);
+                }
+            }
+
+            gpio_set_level(TEC_DT_WR, (linha >> i) & 1 );
+            vTaskDelay(2 / portTICK_RATE_MS);
+            gpio_set_level(TEC_CK, 1);
+            vTaskDelay(2 / portTICK_RATE_MS);
+            gpio_set_level(TEC_CK, 0);
+            
+        }
+        gpio_set_level(TEC_SH_LD,0);
+
+        if(linha <= 1)
+        {
+            linha = 0b1000;
+        }
+        else
+        {
+            linha >>= 1;
+        }
+    }
+    switch (mostra)
+    {
+    case 10:
+        tecla = '1';
+        break;
+    case 11:
+        tecla = '2';
+        break;
+    case 12:
+        tecla = '3';
+        break;
+    case 13:
+        tecla = '-';
+        break;
+    case 20:
+        tecla = 'C';
+        break;
+    case 21:
+        tecla = '0';
+        break;
+    case 22:
+        tecla = '=';
+        break;
+    case 23:
+        tecla = '+';
+        break;
+    case 40:
+        tecla = '7';
+        break;
+    case 41:
+        tecla = '8';
+        break;
+    case 42:
+        tecla = '9';
+        break;
+    case 43:
+        tecla = '/';
+        break;
+    case 80:
+        tecla = '4';
+        break;
+    case 81:
+        tecla = '5';
+        break;
+    case 82:
+        tecla = '6';
+        break;
+    case 83:
+        tecla = 'x';
+        break;
+    default:
+        tecla = '_';
+        break;
+    }
+    return tecla;
+
+}
+
+/*char* lcd595_rotacionar(char* frase, int caracteres, int posicao)
+{
+    char apresentar [12];
+
+
+    for(int i = 0 ; i < (caracteres <= 12 ? caracteres : 12) ; i++)
+    {
+        apresentar[i] = strchr(frase, posicao + i);
+    }
+    ESP_LOGI("LCD", "%s", &apresentar[0]);
+    return &apresentar[0];
+}*/
+
+uint8_t exp_le_escreve (uint8_t enviar)//>26 microssegundos
+{
+    uint8_t recebido = 0;
+    int j;
+    gpio_set_level(EXP_SH_LD,1);
+    ets_delay_us(1);  
+    for (j = 7; j >= 0; j--)
+    {
+        recebido <<= 1;
+        recebido += gpio_get_level(EXP_DT_RD);
+        gpio_set_level(EXP_DT_WR, ( enviar >> j ) & 1);
+        ets_delay_us(1);  
+        gpio_set_level(EXP_CK,1);
+        ets_delay_us(1);  
+        gpio_set_level(EXP_CK,0);
+        ets_delay_us(1);  
+    } 
+    gpio_set_level(EXP_SH_LD,0);
+    ets_delay_us(1);  
+
+    return recebido;
+}
+
+uint8_t io_le_escreve(uint8_t saidas)
+{
+    int j;
+    uint8_t entradas = 0;
+    gpio_set_level(IO_SH_LD,1);
+    ets_delay_us(10); //vTaskDelay(10 / portTICK_RATE_MS);  
+    for (j = 7; j >= 0; j--)
+    {
+        entradas <<= 1;
+        entradas += gpio_get_level(IO_DT_RD);
+        gpio_set_level(IO_DT_WR, ( saidas >> j ) & 1);
+        ets_delay_us(10); //vTaskDelay(10 / portTICK_RATE_MS);
+        gpio_set_level(IO_CK,1);
+        ets_delay_us(10); //vTaskDelay(10 / portTICK_RATE_MS);
+        gpio_set_level(IO_CK,0);
+        ets_delay_us(10); //vTaskDelay(10 / portTICK_RATE_MS);
+    } 
+    gpio_set_level(IO_SH_LD,0);
+    ets_delay_us(10); //vTaskDelay(10 / portTICK_RATE_MS); 
+
+    return entradas;
+
+}
 
 void ioinit(void)
 {
