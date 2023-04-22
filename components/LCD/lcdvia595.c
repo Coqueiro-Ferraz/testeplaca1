@@ -100,6 +100,7 @@ void lcd595_init(void)
 
     lcd595_byte(0x28, 0);
     lcd595_byte(0x0C, 0);
+    //lcd595_byte(0x06, 0);
     lcd595_byte(0x01, 0);
     vTaskDelay(2 / portTICK_RATE_MS);
     dado_atual = 0x00;
